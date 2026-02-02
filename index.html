@@ -366,285 +366,369 @@
 
   <script>
     // Configuration - UPDATE THIS WITH YOUR APPSCRIPT URL
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxccBlTGkUCrLj3-ODUFS-QWHO2-Sa0DgPsx5hn92G-aeJJdAwtxc3tWazDkKjxu-HT/exec';
-    
-    // DOM Elements
-    const form = document.getElementById('certificateForm');
-    const fileUploadArea = document.getElementById('fileUploadArea');
-    const fileInput = document.getElementById('upload-file');
-    const fileInfo = document.getElementById('fileInfo');
-    const fileName = document.getElementById('fileName');
-    const fileSize = document.getElementById('fileSize');
-    const loadingOverlay = document.getElementById('loadingOverlay');
-    const statusMessage = document.getElementById('statusMessage');
-    const submitBtn = document.getElementById('submitBtn');
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxccBlTGkUCrLj3-ODUFS-QWHO2-Sa0DgPsx5hn92G-aeJJdAwtxc3tWazDkKjxu-HT/exec';
+
+// DOM Elements
+const elements = {
+    form: document.getElementById('certificateForm'),
+    fileUploadArea: document.getElementById('fileUploadArea'),
+    fileInput: document.getElementById('upload-file'),
+    fileInfo: document.getElementById('fileInfo'),
+    fileName: document.getElementById('fileName'),
+    fileSize: document.getElementById('fileSize'),
+    loadingOverlay: document.getElementById('loadingOverlay'),
+    statusMessage: document.getElementById('statusMessage'),
+    submitBtn: document.getElementById('submitBtn'),
     
     // Validation elements
-    const nameValidation = document.getElementById('name-validation');
-    const certificateValidation = document.getElementById('certificate-validation');
-    const startDateValidation = document.getElementById('startdate-validation');
-    const endDateValidation = document.getElementById('enddate-validation');
-    const fileValidation = document.getElementById('file-validation');
+    nameValidation: document.getElementById('name-validation'),
+    certificateValidation: document.getElementById('certificate-validation'),
+    startDateValidation: document.getElementById('startdate-validation'),
+    endDateValidation: document.getElementById('enddate-validation'),
+    fileValidation: document.getElementById('file-validation'),
     
     // Form fields
-    const participantName = document.getElementById('participant-name');
-    const certificateNumber = document.getElementById('certificate-number');
-    const startDate = document.getElementById('start-date');
-    const endDate = document.getElementById('end-date');
-    
-    // Set today's date as default for start date
+    participantName: document.getElementById('participant-name'),
+    certificateNumber: document.getElementById('certificate-number'),
+    startDate: document.getElementById('start-date'),
+    endDate: document.getElementById('end-date')
+};
+
+// State management
+const state = {
+    currentFile: null,
+    isSubmitting: false
+};
+
+// Initialize the form
+function initForm() {
+    // Set default dates
     const today = new Date().toISOString().split('T')[0];
-    startDate.value = today;
+    elements.startDate.value = today;
     
-    // Set end date to 7 days from today by default
+    // Set end date to 7 days from today
     const nextWeek = new Date();
     nextWeek.setDate(nextWeek.getDate() + 7);
-    endDate.value = nextWeek.toISOString().split('T')[0];
+    elements.endDate.value = nextWeek.toISOString().split('T')[0];
     
-    // File upload functionality
-    fileUploadArea.addEventListener('click', () => {
-      fileInput.click();
-    });
+    // Add event listeners
+    setupEventListeners();
     
-    fileInput.addEventListener('change', (e) => {
-      const file = e.target.files[0];
-      
-      if (file) {
-        // Check if file is PDF
-        if (file.type !== 'application/pdf') {
-          showValidation(fileValidation, 'Please upload a PDF file.');
-          resetFileInput();
-          return;
-        }
-        
-        // Check file size (10MB max)
-        const maxSize = 10 * 1024 * 1024; // 10MB in bytes
-        if (file.size > maxSize) {
-          showValidation(fileValidation, 'File size exceeds 10MB limit.');
-          resetFileInput();
-          return;
-        }
-        
-        // Show file info
-        fileName.textContent = file.name;
-        fileSize.textContent = formatFileSize(file.size);
-        fileInfo.classList.add('active');
-        hideValidation(fileValidation);
-        
-        // Add visual feedback to upload area
-        fileUploadArea.style.borderColor = '#4CAF50';
-        fileUploadArea.style.backgroundColor = 'rgba(76, 175, 80, 0.05)';
-      }
-    });
-    
-    // Format file size for display
-    function formatFileSize(bytes) {
-      if (bytes === 0) return '0 Bytes';
-      const k = 1024;
-      const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-      const i = Math.floor(Math.log(bytes) / Math.log(k));
-      return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-    }
-    
-    // Reset file input
-    function resetFileInput() {
-      fileInput.value = '';
-      fileInfo.classList.remove('active');
-      fileUploadArea.style.borderColor = '#e1e5eb';
-      fileUploadArea.style.backgroundColor = '#fdfdfd';
-    }
-    
-    // Validation functions
-    function showValidation(element, message = '') {
-      if (message) {
-        element.textContent = message;
-      }
-      element.classList.add('show');
-    }
-    
-    function hideValidation(element) {
-      element.classList.remove('show');
-    }
-    
-    function validateName() {
-      if (participantName.value.trim().length < 3) {
-        showValidation(nameValidation);
-        return false;
-      } else {
-        hideValidation(nameValidation);
-        return true;
-      }
-    }
-    
-    function validateCertificateNumber() {
-      if (certificateNumber.value.trim().length < 5) {
-        showValidation(certificateValidation);
-        return false;
-      } else {
-        hideValidation(certificateValidation);
-        return true;
-      }
-    }
-    
-    function validateDates() {
-      const start = new Date(startDate.value);
-      const end = new Date(endDate.value);
-      
-      if (!startDate.value) {
-        showValidation(startDateValidation, 'Please select a start date.');
-        return false;
-      } else {
-        hideValidation(startDateValidation);
-      }
-      
-      if (!endDate.value) {
-        showValidation(endDateValidation, 'Please select an end date.');
-        return false;
-      } else if (end <= start) {
-        showValidation(endDateValidation, 'End date must be after start date.');
-        return false;
-      } else {
-        hideValidation(endDateValidation);
-        return true;
-      }
-    }
-    
-    function validateFile() {
-      if (!fileInput.files || fileInput.files.length === 0) {
-        showValidation(fileValidation, 'Please upload a PDF file.');
-        return false;
-      }
-      
-      const file = fileInput.files[0];
-      if (file.type !== 'application/pdf') {
-        showValidation(fileValidation, 'Please upload a PDF file.');
-        return false;
-      }
-      
-      const maxSize = 10 * 1024 * 1024;
-      if (file.size > maxSize) {
-        showValidation(fileValidation, 'File size exceeds 10MB limit.');
-        return false;
-      }
-      
-      hideValidation(fileValidation);
-      return true;
-    }
-    
-    // Show status message
-    function showStatus(message, type = 'success') {
-      statusMessage.innerHTML = '';
-      statusMessage.className = 'status-message';
-      
-      const icon = type === 'success' 
-        ? '<i class="fas fa-check-circle"></i>' 
-        : '<i class="fas fa-exclamation-circle"></i>';
-      
-      statusMessage.innerHTML = `${icon}<h3>${message}</h3>`;
-      statusMessage.classList.add(type);
-      
-      // Auto-hide after 5 seconds
-      setTimeout(() => {
-        statusMessage.className = 'status-message';
-      }, 5000);
-    }
+    // Add demo data for testing (remove in production)
+    addDemoData();
+}
+
+// Setup all event listeners
+function setupEventListeners() {
+    // File upload
+    elements.fileUploadArea.addEventListener('click', handleFileUploadClick);
+    elements.fileInput.addEventListener('change', handleFileSelect);
     
     // Real-time validation
-    participantName.addEventListener('input', validateName);
-    participantName.addEventListener('blur', validateName);
+    elements.participantName.addEventListener('input', () => validateName());
+    elements.participantName.addEventListener('blur', () => validateName());
     
-    certificateNumber.addEventListener('input', validateCertificateNumber);
-    certificateNumber.addEventListener('blur', validateCertificateNumber);
+    elements.certificateNumber.addEventListener('input', () => validateCertificateNumber());
+    elements.certificateNumber.addEventListener('blur', () => validateCertificateNumber());
     
-    startDate.addEventListener('change', validateDates);
-    endDate.addEventListener('change', validateDates);
+    elements.startDate.addEventListener('change', () => validateDates());
+    elements.endDate.addEventListener('change', () => validateDates());
     
-    // In your HTML <script> section, replace the form submission part:
+    // Form submission
+    elements.form.addEventListener('submit', handleFormSubmit);
+}
 
-form.addEventListener('submit', async (e) => {
-  e.preventDefault();
-  
-  const isNameValid = validateName();
-  const isCertificateValid = validateCertificateNumber();
-  const areDatesValid = validateDates();
-  const isFileValid = validateFile();
-  
-  if (isNameValid && isCertificateValid && areDatesValid && isFileValid) {
-    loadingOverlay.classList.add('active');
-    submitBtn.disabled = true;
+// File handling
+function handleFileUploadClick() {
+    elements.fileInput.click();
+}
+
+async function handleFileSelect(e) {
+    const file = e.target.files[0];
+    
+    if (!file) return;
+    
+    // Validate file
+    const validation = validateFile(file);
+    if (!validation.isValid) {
+        showValidation(elements.fileValidation, validation.message);
+        resetFileInput();
+        return;
+    }
+    
+    // Store file and show info
+    state.currentFile = file;
+    showFileInfo(file);
+    hideValidation(elements.fileValidation);
+    
+    // Visual feedback
+    elements.fileUploadArea.style.borderColor = '#4CAF50';
+    elements.fileUploadArea.style.backgroundColor = 'rgba(76, 175, 80, 0.05)';
+}
+
+function showFileInfo(file) {
+    elements.fileName.textContent = file.name;
+    elements.fileSize.textContent = formatFileSize(file.size);
+    elements.fileInfo.classList.add('active');
+}
+
+function resetFileInput() {
+    elements.fileInput.value = '';
+    elements.fileInfo.classList.remove('active');
+    elements.fileUploadArea.style.borderColor = '#e1e5eb';
+    elements.fileUploadArea.style.backgroundColor = '#fdfdfd';
+    state.currentFile = null;
+}
+
+function formatFileSize(bytes) {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+}
+
+// Validation functions
+const validators = {
+    name: {
+        validate: () => elements.participantName.value.trim().length >= 3,
+        element: elements.nameValidation,
+        message: 'Please enter your full name (min. 3 characters).'
+    },
+    certificateNumber: {
+        validate: () => elements.certificateNumber.value.trim().length >= 5,
+        element: elements.certificateValidation,
+        message: 'Certificate number must be at least 5 characters long.'
+    },
+    dates: {
+        validate: () => {
+            const start = new Date(elements.startDate.value);
+            const end = new Date(elements.endDate.value);
+            
+            if (!elements.startDate.value) {
+                showValidation(elements.startDateValidation, 'Please select a start date.');
+                return false;
+            }
+            
+            if (!elements.endDate.value) {
+                showValidation(elements.endDateValidation, 'Please select an end date.');
+                return false;
+            }
+            
+            if (end <= start) {
+                showValidation(elements.endDateValidation, 'End date must be after start date.');
+                return false;
+            }
+            
+            return true;
+        }
+    },
+    file: {
+        validate: (file) => {
+            if (!file) {
+                return { isValid: false, message: 'Please upload a PDF file.' };
+            }
+            
+            if (file.type !== 'application/pdf') {
+                return { isValid: false, message: 'Please upload a PDF file.' };
+            }
+            
+            const maxSize = 10 * 1024 * 1024;
+            if (file.size > maxSize) {
+                return { isValid: false, message: 'File size exceeds 10MB limit.' };
+            }
+            
+            return { isValid: true, message: '' };
+        }
+    }
+};
+
+function validateName() {
+    const isValid = validators.name.validate();
+    if (!isValid) {
+        showValidation(elements.nameValidation);
+    } else {
+        hideValidation(elements.nameValidation);
+    }
+    return isValid;
+}
+
+function validateCertificateNumber() {
+    const isValid = validators.certificateNumber.validate();
+    if (!isValid) {
+        showValidation(elements.certificateValidation);
+    } else {
+        hideValidation(elements.certificateValidation);
+    }
+    return isValid;
+}
+
+function validateDates() {
+    return validators.dates.validate();
+}
+
+function validateFile(file) {
+    return validators.file.validate(file);
+}
+
+function showValidation(element, message = '') {
+    if (message) {
+        element.textContent = message;
+    }
+    element.classList.add('show');
+}
+
+function hideValidation(element) {
+    element.classList.remove('show');
+}
+
+// Form submission
+async function handleFormSubmit(e) {
+    e.preventDefault();
+    
+    if (state.isSubmitting) return;
+    
+    // Validate all fields
+    const isNameValid = validateName();
+    const isCertificateValid = validateCertificateNumber();
+    const areDatesValid = validateDates();
+    const fileValidation = validateFile(state.currentFile);
+    const isFileValid = fileValidation.isValid;
+    
+    if (!isFileValid) {
+        showValidation(elements.fileValidation, fileValidation.message);
+    }
+    
+    if (!isNameValid || !isCertificateValid || !areDatesValid || !isFileValid) {
+        scrollToFirstError();
+        return;
+    }
+    
+    // Prepare for submission
+    state.isSubmitting = true;
+    elements.loadingOverlay.classList.add('active');
+    elements.submitBtn.disabled = true;
     
     try {
-      // Convert file to base64
-      const file = fileInput.files[0];
-      const base64File = await convertFileToBase64(file);
-      
-      // Prepare data object
-      const data = {
-        participantName: participantName.value.trim(),
-        certificateNumber: certificateNumber.value.trim(),
-        startDate: startDate.value,
-        endDate: endDate.value,
-        pdfFile: base64File.split(',')[1], // Remove data URL prefix
-        timestamp: new Date().toISOString()
-      };
-      
-      // Send data to Google Apps Script as JSON
-      const response = await fetch(APPS_SCRIPT_URL, {
+        // Convert file to base64
+        const base64File = await convertFileToBase64(state.currentFile);
+        
+        // Prepare submission data
+        const submissionData = {
+            participantName: elements.participantName.value.trim(),
+            certificateNumber: elements.certificateNumber.value.trim(),
+            startDate: elements.startDate.value,
+            endDate: elements.endDate.value,
+            pdfFile: base64File.split(',')[1], // Remove data URL prefix
+            timestamp: new Date().toISOString()
+        };
+        
+        // Submit to Google Apps Script
+        const response = await submitData(submissionData);
+        
+        if (response.success) {
+            showSuccessStatus('Certificate submitted successfully! Your data has been saved.');
+            resetForm();
+        } else {
+            throw new Error(response.message || 'Failed to submit certificate');
+        }
+    } catch (error) {
+        console.error('Submission error:', error);
+        showErrorStatus(`Error: ${error.message || 'Could not connect to server. Please try again.'}`);
+    } finally {
+        state.isSubmitting = false;
+        elements.loadingOverlay.classList.remove('active');
+        elements.submitBtn.disabled = false;
+    }
+}
+
+async function convertFileToBase64(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = () => reject(new Error('Failed to read file'));
+        reader.readAsDataURL(file);
+    });
+}
+
+async function submitData(data) {
+    const response = await fetch(APPS_SCRIPT_URL, {
         method: 'POST',
         body: JSON.stringify(data),
         headers: {
-          'Content-Type': 'application/json'
+            'Content-Type': 'application/json'
         }
-      });
-      
-      const result = await response.json();
-      
-      if (result.success) {
-        showStatus('Certificate submitted successfully! Your data has been saved.', 'success');
-        form.reset();
-        resetFileInput();
-        
-        // Reset dates to defaults
-        startDate.value = today;
-        const newNextWeek = new Date();
-        newNextWeek.setDate(newNextWeek.getDate() + 7);
-        endDate.value = newNextWeek.toISOString().split('T')[0];
-      } else {
-        showStatus(`Error: ${result.message || 'Failed to submit certificate'}`, 'error');
-      }
-    } catch (error) {
-      console.error('Submission error:', error);
-      showStatus('Error: Could not connect to server. Please try again.', 'error');
-    } finally {
-      loadingOverlay.classList.remove('active');
-      submitBtn.disabled = false;
+    });
+    
+    if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
     }
-  } else {
+    
+    return await response.json();
+}
+
+// UI feedback functions
+function showSuccessStatus(message) {
+    showStatus(message, 'success');
+}
+
+function showErrorStatus(message) {
+    showStatus(message, 'error');
+}
+
+function showStatus(message, type = 'success') {
+    const icon = type === 'success' 
+        ? '<i class="fas fa-check-circle"></i>' 
+        : '<i class="fas fa-exclamation-circle"></i>';
+    
+    elements.statusMessage.innerHTML = `${icon}<h3>${message}</h3>`;
+    elements.statusMessage.className = `status-message ${type}`;
+    
+    // Auto-hide after 5 seconds
+    setTimeout(() => {
+        elements.statusMessage.className = 'status-message';
+    }, 5000);
+}
+
+function scrollToFirstError() {
     const firstError = document.querySelector('.validation-message.show');
     if (firstError) {
-      firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        firstError.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'center' 
+        });
     }
-  }
-});
-
-// Add this helper function
-function convertFileToBase64(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result);
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
 }
+
+function resetForm() {
+    elements.form.reset();
+    resetFileInput();
     
-    // Initialize with some sample data for demo (remove in production)
-    window.addEventListener('load', () => {
-      // Remove or comment these lines in production
-      participantName.value = 'Alex Johnson';
-      certificateNumber.value = 'CERT-2023-58742';
-      validateName();
-      validateCertificateNumber();
+    // Reset dates to defaults
+    const today = new Date().toISOString().split('T')[0];
+    elements.startDate.value = today;
+    
+    const nextWeek = new Date();
+    nextWeek.setDate(nextWeek.getDate() + 7);
+    elements.endDate.value = nextWeek.toISOString().split('T')[0];
+    
+    // Clear validations
+    [elements.nameValidation, elements.certificateValidation, 
+     elements.startDateValidation, elements.endDateValidation].forEach(el => {
+        hideValidation(el);
     });
+}
+
+// Demo data for testing (remove in production)
+function addDemoData() {
+    elements.participantName.value = 'Alex Johnson';
+    elements.certificateNumber.value = 'CERT-2023-58742';
+    validateName();
+    validateCertificateNumber();
+}
+
+// Initialize when DOM is loaded
+document.addEventListener('DOMContentLoaded', initForm);
   </script>
 </body>
 </html>
