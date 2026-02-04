@@ -1,734 +1,889 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Certificate Submission Form</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
-    
-    body {
-      background-color: #f8f9fa;
-      color: #333;
-      line-height: 1.6;
-      padding: 20px;
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-    
-    .container {
-      width: 100%;
-      max-width: 800px;
-      margin: 0 auto;
-    }
-    
-    .header {
-      text-align: center;
-      margin-bottom: 30px;
-    }
-    
-    .header h1 {
-      color: #ff6b35;
-      font-size: 2.5rem;
-      margin-bottom: 10px;
-      position: relative;
-      display: inline-block;
-    }
-    
-    .header h1:after {
-      content: '';
-      position: absolute;
-      width: 70px;
-      height: 4px;
-      background-color: #ff6b35;
-      bottom: -10px;
-      left: 50%;
-      transform: translateX(-50%);
-      border-radius: 2px;
-    }
-    
-    .header p {
-      color: #666;
-      font-size: 1.1rem;
-      margin-top: 20px;
-    }
-    
-    .form-container {
-      background-color: white;
-      border-radius: 12px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-      overflow: hidden;
-      padding: 40px;
-    }
-    
-    .form-group {
-      margin-bottom: 25px;
-      position: relative;
-    }
-    
-    .form-group label {
-      display: block;
-      margin-bottom: 8px;
-      font-weight: 600;
-      color: #444;
-      font-size: 1rem;
-    }
-    
-    .form-group label i {
-      margin-right: 8px;
-      color: #ff6b35;
-      width: 20px;
-      text-align: center;
-    }
-    
-    .form-control {
-      width: 100%;
-      padding: 14px 16px;
-      border: 2px solid #e1e5eb;
-      border-radius: 8px;
-      font-size: 1rem;
-      transition: all 0.3s ease;
-      background-color: #fdfdfd;
-    }
-    
-    .form-control:focus {
-      outline: none;
-      border-color: #ff6b35;
-      box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
-    }
-    
-    .date-group {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 20px;
-    }
-    
-    .file-upload-area {
-      border: 2px dashed #e1e5eb;
-      border-radius: 8px;
-      padding: 30px;
-      text-align: center;
-      background-color: #fdfdfd;
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-    
-    .file-upload-area:hover {
-      border-color: #ff6b35;
-      background-color: rgba(255, 107, 53, 0.02);
-    }
-    
-    .file-upload-area i {
-      font-size: 3rem;
-      color: #ff6b35;
-      margin-bottom: 15px;
-    }
-    
-    .file-upload-area h3 {
-      color: #444;
-      margin-bottom: 10px;
-    }
-    
-    .file-upload-area p {
-      color: #777;
-      font-size: 0.9rem;
-    }
-    
-    .file-info {
-      margin-top: 15px;
-      padding: 12px;
-      background-color: #f8f9fa;
-      border-radius: 6px;
-      display: none;
-    }
-    
-    .file-info.active {
-      display: block;
-    }
-    
-    .submit-btn {
-      background-color: #ff6b35;
-      color: white;
-      border: none;
-      padding: 16px 32px;
-      font-size: 1.1rem;
-      font-weight: 600;
-      border-radius: 8px;
-      cursor: pointer;
-      width: 100%;
-      transition: all 0.3s ease;
-      margin-top: 10px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-    
-    .submit-btn:hover:not(:disabled) {
-      background-color: #e55a2b;
-      transform: translateY(-2px);
-      box-shadow: 0 5px 15px rgba(255, 107, 53, 0.2);
-    }
-    
-    .submit-btn:disabled {
-      background-color: #cccccc;
-      cursor: not-allowed;
-    }
-    
-    .submit-btn i {
-      margin-right: 10px;
-    }
-    
-    .validation-message {
-      color: #e74c3c;
-      font-size: 0.85rem;
-      margin-top: 5px;
-      display: none;
-    }
-    
-    .validation-message.show {
-      display: block;
-    }
-    
-    .loading-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background-color: rgba(255, 255, 255, 0.9);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 1000;
-      display: none;
-    }
-    
-    .loading-overlay.active {
-      display: flex;
-    }
-    
-    .spinner {
-      width: 60px;
-      height: 60px;
-      border: 5px solid #f3f3f3;
-      border-top: 5px solid #ff6b35;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-    }
-    
-    .status-message {
-      padding: 20px;
-      border-radius: 8px;
-      margin-top: 20px;
-      text-align: center;
-      display: none;
-    }
-    
-    .status-message.success {
-      background-color: #d4edda;
-      color: #155724;
-      border: 1px solid #c3e6cb;
-      display: block;
-    }
-    
-    .status-message.error {
-      background-color: #f8d7da;
-      color: #721c24;
-      border: 1px solid #f5c6cb;
-      display: block;
-    }
-    
-    .status-message i {
-      font-size: 2rem;
-      margin-bottom: 10px;
-    }
-    
-    .footer {
-      text-align: center;
-      margin-top: 30px;
-      color: #777;
-      font-size: 0.9rem;
-    }
-    
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-    
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    
-    @media (max-width: 768px) {
-      .date-group {
-        grid-template-columns: 1fr;
-        gap: 15px;
-      }
-      
-      .form-container {
-        padding: 25px;
-      }
-      
-      .header h1 {
-        font-size: 2rem;
-      }
-    }
-    
-    @media (max-width: 480px) {
-      body {
-        padding: 10px;
-      }
-      
-      .form-container {
-        padding: 20px;
-      }
-      
-      .header h1 {
-        font-size: 1.8rem;
-      }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Certificate Verification</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Import styles from existing style.css */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f9f9f9;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+            background-image: linear-gradient(135deg, rgba(255, 126, 0, 0.05) 0%, rgba(255, 85, 0, 0.05) 100%);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+        }
+
+        /* Header Styles */
+        .header {
+            background: linear-gradient(135deg, #ff7e00 0%, #ff5500 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            border-bottom: 5px solid #e65c00;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 10px;
+        }
+
+        .logo i {
+            font-size: 2.8rem;
+        }
+
+        .logo h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* Navigation */
+        .nav {
+            background-color: #fff5e6;
+            padding: 15px 30px;
+            border-bottom: 1px solid #ffd9b3;
+        }
+
+        .nav-list {
+            display: flex;
+            list-style: none;
+            gap: 20px;
+        }
+
+        .nav-link {
+            text-decoration: none;
+            color: #ff7e00;
+            font-weight: 600;
+            padding: 8px 16px;
+            border-radius: 5px;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nav-link:hover {
+            background-color: rgba(255, 126, 0, 0.1);
+        }
+
+        .nav-link.active {
+            background-color: #ff7e00;
+            color: white;
+        }
+
+        /* Main Content */
+        .main-content {
+            padding: 40px 30px;
+        }
+
+        .verification-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+        }
+
+        .verification-header {
+            background-color: #fff5e6;
+            padding: 25px;
+            border-bottom: 2px solid #ffd9b3;
+            text-align: center;
+        }
+
+        .verification-header h2 {
+            color: #ff7e00;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+        }
+
+        .verification-header p {
+            color: #666;
+            font-size: 1rem;
+        }
+
+        /* Form Styles */
+        .verification-form {
+            padding: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #444;
+            font-size: 1.1rem;
+        }
+
+        .required {
+            color: #ff3e3e;
+        }
+
+        .form-group input[type="text"] {
+            width: 100%;
+            padding: 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            transition: all 0.3s;
+        }
+
+        .form-group input[type="text"]:focus {
+            border-color: #ff7e00;
+            box-shadow: 0 0 0 3px rgba(255, 126, 0, 0.2);
+            outline: none;
+        }
+
+        .search-box {
+            position: relative;
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #999;
+        }
+
+        .search-box input {
+            padding-left: 45px !important;
+        }
+
+        .error-message {
+            color: #ff3e3e;
+            font-size: 0.9rem;
+            margin-top: 5px;
+            min-height: 20px;
+        }
+
+        /* Button Styles */
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .btn {
+            padding: 16px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.3s;
+            flex: 1;
+        }
+
+        .submit-btn {
+            background-color: #ff7e00;
+            color: white;
+        }
+
+        .submit-btn:hover {
+            background-color: #e65c00;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 126, 0, 0.3);
+        }
+
+        .reset-btn {
+            background-color: #f0f0f0;
+            color: #666;
+        }
+
+        .reset-btn:hover {
+            background-color: #e0e0e0;
+        }
+
+        /* Results Container */
+        .results-container {
+            margin-top: 40px;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            display: none;
+        }
+
+        .results-header {
+            background-color: #4caf50;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .results-header h3 {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-size: 1.5rem;
+        }
+
+        .results-content {
+            padding: 30px;
+        }
+
+        .certificate-details {
+            background-color: #f9f9f9;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 30px;
+            border-left: 5px solid #ff7e00;
+        }
+
+        .detail-row {
+            display: flex;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .detail-row:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: #555;
+            min-width: 180px;
+        }
+
+        .detail-value {
+            color: #333;
+            font-weight: 500;
+        }
+
+        .valid-badge {
+            background-color: #4caf50;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .invalid-badge {
+            background-color: #f44336;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Certificate Preview */
+        .certificate-preview {
+            border: 20px solid transparent;
+            border-image: linear-gradient(45deg, #ff7e00, #ff5500) 1;
+            padding: 30px;
+            background-color: white;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .certificate-content {
+            padding: 20px;
+        }
+
+        .certificate-content h3 {
+            color: #ff7e00;
+            font-size: 2rem;
+            margin-bottom: 15px;
+            letter-spacing: 2px;
+        }
+
+        .certificate-logo {
+            font-size: 3rem;
+            color: #ff7e00;
+            margin-bottom: 20px;
+        }
+
+        .participant-name {
+            color: #ff7e00;
+            font-size: 2.5rem;
+            margin: 25px 0;
+            padding: 10px;
+            border-bottom: 2px dashed #ffd9b3;
+            display: inline-block;
+        }
+
+        .date-info {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin: 30px 0;
+            color: #666;
+            font-size: 1.1rem;
+        }
+
+        .certificate-number {
+            margin-top: 40px;
+            font-size: 1.2rem;
+            color: #333;
+            font-weight: 600;
+            background-color: #fff5e6;
+            padding: 10px 20px;
+            border-radius: 5px;
+            display: inline-block;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 50px 30px;
+            color: #666;
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            color: #ddd;
+            margin-bottom: 20px;
+        }
+
+        .empty-state h4 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            color: #888;
+        }
+
+        /* Notification & Loading */
+        .notification {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            background-color: #4caf50;
+            color: white;
+            padding: 18px 25px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            display: none;
+            z-index: 1000;
+            animation: slideIn 0.5s ease;
+        }
+
+        .notification-content {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .notification i {
+            font-size: 1.5rem;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.95);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .spinner {
+            width: 70px;
+            height: 70px;
+            border: 6px solid #f3f3f3;
+            border-top: 6px solid #ff7e00;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-overlay p {
+            font-size: 1.2rem;
+            color: #ff7e00;
+            font-weight: 600;
+        }
+
+        /* Footer */
+        .footer {
+            margin-top: 40px;
+            text-align: center;
+            color: #888;
+            font-size: 0.9rem;
+            padding: 20px;
+            border-top: 1px solid #eee;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-list {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .button-group {
+                flex-direction: column;
+            }
+            
+            .date-info {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .detail-row {
+                flex-direction: column;
+            }
+            
+            .detail-label {
+                min-width: 100%;
+                margin-bottom: 5px;
+            }
+        }
+    </style>
 </head>
 <body>
-  <div class="loading-overlay" id="loadingOverlay">
-    <div class="spinner"></div>
-  </div>
-  
-  <div class="container">
-    <div class="header">
-      <h1>Certificate Submission</h1>
-      <p>Please fill out the form below to submit your certificate for verification. All fields are required.</p>
+    <div class="container">
+        <header class="header">
+            <div class="logo">
+                <i class="fas fa-certificate"></i>
+                <h1>Certificate Verification System</h1>
+            </div>
+            <p>Verify the authenticity of certificates issued by our training program</p>
+        </header>
+
+        
+
+        <main class="main-content">
+            <div class="verification-container">
+                <div class="verification-header">
+                    <h2><i class="fas fa-search"></i> Verify Certificate</h2>
+                    <p>Enter the certificate number to verify its authenticity and view details</p>
+                </div>
+                
+                <div class="verification-form">
+                    <form id="verificationForm">
+                        <div class="form-group search-box">
+                            <label for="certificateNumber">
+                                <i class="fas fa-hashtag"></i> Certificate Number
+                                <span class="required">*</span>
+                            </label>
+                            <div style="position: relative;">
+                                <i class="fas fa-search"></i>
+                                <input type="text" id="certificateNumber" name="certificateNumber" 
+                                       placeholder="Enter certificate number (e.g., CERT-2023-001)">
+                            </div>
+                            <div class="error-message" id="certNumberError"></div>
+                            <div style="font-size: 0.9rem; color: #666; margin-top: 8px;">
+                                <i class="fas fa-info-circle"></i> Enter the exact certificate number as shown on the certificate
+                            </div>
+                        </div>
+
+                        <div class="button-group">
+                            <button type="submit" class="btn submit-btn" id="submitBtn">
+                                <i class="fas fa-search"></i> Verify Certificate
+                            </button>
+                            <button type="button" class="btn reset-btn" id="resetBtn">
+                                <i class="fas fa-redo"></i> Clear
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Results will be displayed here -->
+            <div class="results-container" id="resultsContainer">
+                <div class="results-header">
+                    <h3><i class="fas fa-check-circle"></i> Certificate Verified Successfully</h3>
+                </div>
+                
+                <div class="results-content">
+                    <div class="certificate-details">
+                        <h4><i class="fas fa-info-circle"></i> Certificate Details</h4>
+                        <div class="detail-row">
+                            <div class="detail-label">Certificate Number:</div>
+                            <div class="detail-value" id="resultCertNumber"></div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Participant Name:</div>
+                            <div class="detail-value" id="resultName"></div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Training Start Date:</div>
+                            <div class="detail-value" id="resultStartDate"></div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Training End Date:</div>
+                            <div class="detail-value" id="resultEndDate"></div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Status:</div>
+                            <div class="detail-value">
+                                <span class="valid-badge" id="validityBadge">
+                                    <i class="fas fa-shield-alt"></i> Valid Certificate
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="certificate-preview">
+                        <div class="certificate-logo">
+                            <i class="fas fa-award"></i>
+                        </div>
+                        <div class="certificate-content">
+                            <h3>CERTIFICATE OF COMPLETION</h3>
+                            <p style="color: #666; font-size: 1.2rem; margin-bottom: 10px;">This certifies that</p>
+                            <h2 class="participant-name" id="previewName"></h2>
+                            <p style="color: #666; font-size: 1.2rem; margin: 20px 0;">has successfully completed the training program</p>
+                            <div class="date-info">
+                                <p>From: <span id="previewStartDate"></span></p>
+                                <p>To: <span id="previewEndDate"></span></p>
+                            </div>
+                            <div class="certificate-number">
+                                Certificate ID: <span id="previewCertNumber"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Empty State (shown when no search has been performed) -->
+            <div class="empty-state" id="emptyState">
+                <i class="fas fa-search"></i>
+                <h4>No Certificate Searched Yet</h4>
+                <p>Enter a certificate number above to verify its authenticity and view details</p>
+            </div>
+        </main>
+
+        <div class="notification" id="notification">
+            <div class="notification-content">
+                <i class="fas fa-check-circle"></i>
+                <p>Certificate verification successful!</p>
+            </div>
+        </div>
+
+        <div class="loading-overlay" id="loadingOverlay">
+            <div class="spinner"></div>
+            <p>Searching for certificate...</p>
+        </div>
+
+        <div class="footer">
+            <p><i class="fas fa-shield-alt"></i> This verification system is secured and maintained by Certificate Management System</p>
+            <p>© 2023 Certificate Generator. All rights reserved.</p>
+        </div>
     </div>
-    
-    <div class="form-container">
-      <form id="certificateForm">
-        <div class="form-group">
-          <label for="participant-name"><i class="fas fa-user"></i> Full Name of the Participant</label>
-          <input type="text" id="participant-name" class="form-control" placeholder="Enter your full name">
-          <div class="validation-message" id="name-validation">Please enter your full name (min. 3 characters).</div>
-        </div>
-        
-        <div class="form-group">
-          <label for="certificate-number"><i class="fas fa-certificate"></i> Certificate Number</label>
-          <input type="text" id="certificate-number" class="form-control" placeholder="Enter certificate number">
-          <div class="validation-message" id="certificate-validation">Certificate number must be at least 5 characters long.</div>
-        </div>
-        
-        <div class="date-group">
-          <div class="form-group">
-            <label for="start-date"><i class="fas fa-calendar-alt"></i> Start Date</label>
-            <input type="date" id="start-date" class="form-control">
-            <div class="validation-message" id="startdate-validation">Please select a valid start date.</div>
-          </div>
-          
-          <div class="form-group">
-            <label for="end-date"><i class="fas fa-calendar-check"></i> End Date</label>
-            <input type="date" id="end-date" class="form-control">
-            <div class="validation-message" id="enddate-validation">End date must be after start date.</div>
-          </div>
-        </div>
-        
-        <div class="form-group">
-          <label><i class="fas fa-file-upload"></i> Upload File</label>
-          <div class="file-upload-area" id="fileUploadArea">
-            <i class="fas fa-cloud-upload-alt"></i>
-            <h3>Click to upload your certificate</h3>
-            <p>File should be in .pdf format, 10 MB max</p>
-            <input type="file" id="upload-file" accept=".pdf" hidden>
-          </div>
-          <div class="file-info" id="fileInfo">
-            <span id="fileName"></span> (<span id="fileSize"></span>)
-          </div>
-          <div class="validation-message" id="file-validation">Please upload a PDF file (max 10MB).</div>
-        </div>
-        
-        <button type="submit" class="submit-btn" id="submitBtn">
-          <i class="fas fa-paper-plane"></i> Submit Certificate
-        </button>
-      </form>
-      
-      <div class="status-message" id="statusMessage"></div>
-    </div>
-    
-    <div class="footer">
-      <p>Certificate Submission System &copy; 2023 | All rights reserved</p>
-    </div>
-  </div>
 
-  <script>
-    // Configuration - UPDATE THIS WITH YOUR APPSCRIPT URL
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxccBlTGkUCrLj3-ODUFS-QWHO2-Sa0DgPsx5hn92G-aeJJdAwtxc3tWazDkKjxu-HT/exec';
-
-// DOM Elements
-const elements = {
-    form: document.getElementById('certificateForm'),
-    fileUploadArea: document.getElementById('fileUploadArea'),
-    fileInput: document.getElementById('upload-file'),
-    fileInfo: document.getElementById('fileInfo'),
-    fileName: document.getElementById('fileName'),
-    fileSize: document.getElementById('fileSize'),
-    loadingOverlay: document.getElementById('loadingOverlay'),
-    statusMessage: document.getElementById('statusMessage'),
-    submitBtn: document.getElementById('submitBtn'),
-    
-    // Validation elements
-    nameValidation: document.getElementById('name-validation'),
-    certificateValidation: document.getElementById('certificate-validation'),
-    startDateValidation: document.getElementById('startdate-validation'),
-    endDateValidation: document.getElementById('enddate-validation'),
-    fileValidation: document.getElementById('file-validation'),
-    
-    // Form fields
-    participantName: document.getElementById('participant-name'),
-    certificateNumber: document.getElementById('certificate-number'),
-    startDate: document.getElementById('start-date'),
-    endDate: document.getElementById('end-date')
-};
-
-// State management
-const state = {
-    currentFile: null,
-    isSubmitting: false
-};
-
-// Initialize the form
-function initForm() {
-    // Set default dates
-    const today = new Date().toISOString().split('T')[0];
-    elements.startDate.value = today;
-    
-    // Set end date to 7 days from today
-    const nextWeek = new Date();
-    nextWeek.setDate(nextWeek.getDate() + 7);
-    elements.endDate.value = nextWeek.toISOString().split('T')[0];
-    
-    // Add event listeners
-    setupEventListeners();
-    
-    // Add demo data for testing (remove in production)
-    addDemoData();
-}
-
-// Setup all event listeners
-function setupEventListeners() {
-    // File upload
-    elements.fileUploadArea.addEventListener('click', handleFileUploadClick);
-    elements.fileInput.addEventListener('change', handleFileSelect);
-    
-    // Real-time validation
-    elements.participantName.addEventListener('input', () => validateName());
-    elements.participantName.addEventListener('blur', () => validateName());
-    
-    elements.certificateNumber.addEventListener('input', () => validateCertificateNumber());
-    elements.certificateNumber.addEventListener('blur', () => validateCertificateNumber());
-    
-    elements.startDate.addEventListener('change', () => validateDates());
-    elements.endDate.addEventListener('change', () => validateDates());
-    
-    // Form submission
-    elements.form.addEventListener('submit', handleFormSubmit);
-}
-
-// File handling
-function handleFileUploadClick() {
-    elements.fileInput.click();
-}
-
-async function handleFileSelect(e) {
-    const file = e.target.files[0];
-    
-    if (!file) return;
-    
-    // Validate file
-    const validation = validateFile(file);
-    if (!validation.isValid) {
-        showValidation(elements.fileValidation, validation.message);
-        resetFileInput();
-        return;
-    }
-    
-    // Store file and show info
-    state.currentFile = file;
-    showFileInfo(file);
-    hideValidation(elements.fileValidation);
-    
-    // Visual feedback
-    elements.fileUploadArea.style.borderColor = '#4CAF50';
-    elements.fileUploadArea.style.backgroundColor = 'rgba(76, 175, 80, 0.05)';
-}
-
-function showFileInfo(file) {
-    elements.fileName.textContent = file.name;
-    elements.fileSize.textContent = formatFileSize(file.size);
-    elements.fileInfo.classList.add('active');
-}
-
-function resetFileInput() {
-    elements.fileInput.value = '';
-    elements.fileInfo.classList.remove('active');
-    elements.fileUploadArea.style.borderColor = '#e1e5eb';
-    elements.fileUploadArea.style.backgroundColor = '#fdfdfd';
-    state.currentFile = null;
-}
-
-function formatFileSize(bytes) {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-}
-
-// Validation functions
-const validators = {
-    name: {
-        validate: () => elements.participantName.value.trim().length >= 3,
-        element: elements.nameValidation,
-        message: 'Please enter your full name (min. 3 characters).'
-    },
-    certificateNumber: {
-        validate: () => elements.certificateNumber.value.trim().length >= 5,
-        element: elements.certificateValidation,
-        message: 'Certificate number must be at least 5 characters long.'
-    },
-    dates: {
-        validate: () => {
-            const start = new Date(elements.startDate.value);
-            const end = new Date(elements.endDate.value);
+    <script>
+        // Verification functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get form elements
+            const form = document.getElementById('verificationForm');
+            const certificateNumberInput = document.getElementById('certificateNumber');
+            const certNumberError = document.getElementById('certNumberError');
+            const submitBtn = document.getElementById('submitBtn');
+            const resetBtn = document.getElementById('resetBtn');
             
-            if (!elements.startDate.value) {
-                showValidation(elements.startDateValidation, 'Please select a start date.');
-                return false;
+            // Results elements
+            const resultsContainer = document.getElementById('resultsContainer');
+            const emptyState = document.getElementById('emptyState');
+            const resultCertNumber = document.getElementById('resultCertNumber');
+            const resultName = document.getElementById('resultName');
+            const resultStartDate = document.getElementById('resultStartDate');
+            const resultEndDate = document.getElementById('resultEndDate');
+            const validityBadge = document.getElementById('validityBadge');
+            
+            // Preview elements
+            const previewName = document.getElementById('previewName');
+            const previewCertNumber = document.getElementById('previewCertNumber');
+            const previewStartDate = document.getElementById('previewStartDate');
+            const previewEndDate = document.getElementById('previewEndDate');
+            
+            // Notification and loading overlay
+            const notification = document.getElementById('notification');
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            
+            // Form validation function
+            function validateForm() {
+                let isValid = true;
+                
+                // Reset error message
+                certNumberError.textContent = '';
+                
+                // Validate certificate number
+                if (!certificateNumberInput.value.trim()) {
+                    certNumberError.textContent = 'Certificate number is required';
+                    isValid = false;
+                } else if (certificateNumberInput.value.trim().length < 3) {
+                    certNumberError.textContent = 'Please enter a valid certificate number';
+                    isValid = false;
+                }
+                
+                return isValid;
             }
             
-            if (!elements.endDate.value) {
-                showValidation(elements.endDateValidation, 'Please select an end date.');
-                return false;
+            // Format date to readable string
+            function formatDate(dateString) {
+                if (!dateString) return 'N/A';
+                
+                try {
+                    const date = new Date(dateString);
+                    if (isNaN(date.getTime())) return dateString;
+                    
+                    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+                    return date.toLocaleDateString('en-US', options);
+                } catch (error) {
+                    return dateString;
+                }
             }
             
-            if (end <= start) {
-                showValidation(elements.endDateValidation, 'End date must be after start date.');
-                return false;
+            // Show notification
+            function showNotification(message, isSuccess = true) {
+                const icon = notification.querySelector('i');
+                const text = notification.querySelector('p');
+                
+                if (isSuccess) {
+                    notification.style.backgroundColor = '#4caf50';
+                    icon.className = 'fas fa-check-circle';
+                } else {
+                    notification.style.backgroundColor = '#f44336';
+                    icon.className = 'fas fa-exclamation-circle';
+                }
+                
+                text.textContent = message;
+                notification.style.display = 'block';
+                
+                // Hide notification after 5 seconds
+                setTimeout(() => {
+                    notification.style.display = 'none';
+                }, 5000);
             }
             
-            return true;
-        }
-    },
-    file: {
-        validate: (file) => {
-            if (!file) {
-                return { isValid: false, message: 'Please upload a PDF file.' };
+            // Search certificate in Google Sheets
+            async function searchCertificate(certNumber) {
+                try {
+                    // Show loading overlay
+                    loadingOverlay.style.display = 'flex';
+                    
+                    // Google Apps Script Web App URL for searching certificates
+                    // Replace with your actual Google Apps Script Web App URL
+                    const scriptURL = 'https://script.google.com/macros/s/AKfycbwnWD17NqZ_T3WkHsHwWYiEWH3B3i6HFM2ocMl9OtDMEBlYSKuAXVT2CJho448PUvac/exec';
+                    
+                    // Send search request to Google Apps Script
+                    const response = await fetch(`${scriptURL}?action=search&certificateNumber=${encodeURIComponent(certNumber)}`);
+                    
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    
+                    const data = await response.json();
+                    
+                    // Hide loading overlay
+                    loadingOverlay.style.display = 'none';
+                    
+                    return data;
+                    
+                } catch (error) {
+                    // Hide loading overlay
+                    loadingOverlay.style.display = 'none';
+                    
+                    console.error('Error searching certificate:', error);
+                    throw error;
+                }
             }
             
-            if (file.type !== 'application/pdf') {
-                return { isValid: false, message: 'Please upload a PDF file.' };
+            // Display certificate results
+            function displayCertificateResult(certData) {
+                // Hide empty state
+                emptyState.style.display = 'none';
+                
+                // Show results container
+                resultsContainer.style.display = 'block';
+                
+                // Update results with certificate data
+                resultCertNumber.textContent = certData.certificateNumber || 'N/A';
+                resultName.textContent = certData.participantName || 'N/A';
+                resultStartDate.textContent = formatDate(certData.trainingStartDate);
+                resultEndDate.textContent = formatDate(certData.trainingEndDate);
+                
+                // Update preview
+                previewName.textContent = certData.participantName || '[Participant Name]';
+                previewCertNumber.textContent = certData.certificateNumber || '[Certificate Number]';
+                previewStartDate.textContent = formatDate(certData.trainingStartDate);
+                previewEndDate.textContent = formatDate(certData.trainingEndDate);
+                
+                // Update validity badge
+                if (certData.found) {
+                    validityBadge.className = 'valid-badge';
+                    validityBadge.innerHTML = '<i class="fas fa-shield-alt"></i> Valid Certificate';
+                    showNotification('Certificate verified successfully!');
+                } else {
+                    validityBadge.className = 'invalid-badge';
+                    validityBadge.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Certificate Not Found';
+                    showNotification('Certificate not found in our records.', false);
+                }
+                
+                // Scroll to results
+                resultsContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
             
-            const maxSize = 10 * 1024 * 1024;
-            if (file.size > maxSize) {
-                return { isValid: false, message: 'File size exceeds 10MB limit.' };
-            }
+            // Form submission handler
+            form.addEventListener('submit', async function(event) {
+                event.preventDefault();
+                
+                if (!validateForm()) {
+                    showNotification('Please enter a valid certificate number', false);
+                    return;
+                }
+                
+                const certNumber = certificateNumberInput.value.trim();
+                
+                try {
+                    // Search for the certificate
+                    const result = await searchCertificate(certNumber);
+                    
+                    // Display the result
+                    displayCertificateResult(result);
+                    
+                } catch (error) {
+                    // Show error state
+                    emptyState.style.display = 'block';
+                    resultsContainer.style.display = 'none';
+                    
+                    // Show error notification
+                    showNotification('Error searching for certificate. Please try again.', false);
+                    
+                    console.error('Error:', error);
+                }
+            });
             
-            return { isValid: true, message: '' };
-        }
-    }
-};
-
-function validateName() {
-    const isValid = validators.name.validate();
-    if (!isValid) {
-        showValidation(elements.nameValidation);
-    } else {
-        hideValidation(elements.nameValidation);
-    }
-    return isValid;
-}
-
-function validateCertificateNumber() {
-    const isValid = validators.certificateNumber.validate();
-    if (!isValid) {
-        showValidation(elements.certificateValidation);
-    } else {
-        hideValidation(elements.certificateValidation);
-    }
-    return isValid;
-}
-
-function validateDates() {
-    return validators.dates.validate();
-}
-
-function validateFile(file) {
-    return validators.file.validate(file);
-}
-
-function showValidation(element, message = '') {
-    if (message) {
-        element.textContent = message;
-    }
-    element.classList.add('show');
-}
-
-function hideValidation(element) {
-    element.classList.remove('show');
-}
-
-// Form submission
-async function handleFormSubmit(e) {
-    e.preventDefault();
-    
-    if (state.isSubmitting) return;
-    
-    // Validate all fields
-    const isNameValid = validateName();
-    const isCertificateValid = validateCertificateNumber();
-    const areDatesValid = validateDates();
-    const fileValidation = validateFile(state.currentFile);
-    const isFileValid = fileValidation.isValid;
-    
-    if (!isFileValid) {
-        showValidation(elements.fileValidation, fileValidation.message);
-    }
-    
-    if (!isNameValid || !isCertificateValid || !areDatesValid || !isFileValid) {
-        scrollToFirstError();
-        return;
-    }
-    
-    // Prepare for submission
-    state.isSubmitting = true;
-    elements.loadingOverlay.classList.add('active');
-    elements.submitBtn.disabled = true;
-    
-    try {
-        // Convert file to base64
-        const base64File = await convertFileToBase64(state.currentFile);
-        
-        // Prepare submission data
-        const submissionData = {
-            participantName: elements.participantName.value.trim(),
-            certificateNumber: elements.certificateNumber.value.trim(),
-            startDate: elements.startDate.value,
-            endDate: elements.endDate.value,
-            pdfFile: base64File.split(',')[1], // Remove data URL prefix
-            timestamp: new Date().toISOString()
-        };
-        
-        // Submit to Google Apps Script
-        const response = await submitData(submissionData);
-        
-        if (response.success) {
-            showSuccessStatus('Certificate submitted successfully! Your data has been saved.');
-            resetForm();
-        } else {
-            throw new Error(response.message || 'Failed to submit certificate');
-        }
-    } catch (error) {
-        console.error('Submission error:', error);
-        showErrorStatus(`Error: ${error.message || 'Could not connect to server. Please try again.'}`);
-    } finally {
-        state.isSubmitting = false;
-        elements.loadingOverlay.classList.remove('active');
-        elements.submitBtn.disabled = false;
-    }
-}
-
-async function convertFileToBase64(file) {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = () => reject(new Error('Failed to read file'));
-        reader.readAsDataURL(file);
-    });
-}
-
-async function submitData(data) {
-    const response = await fetch(APPS_SCRIPT_URL, {
-        method: 'POST',
-        body: JSON.stringify(data),
-        headers: {
-            'Content-Type': 'application/json'
-        }
-    });
-    
-    if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    
-    return await response.json();
-}
-
-// UI feedback functions
-function showSuccessStatus(message) {
-    showStatus(message, 'success');
-}
-
-function showErrorStatus(message) {
-    showStatus(message, 'error');
-}
-
-function showStatus(message, type = 'success') {
-    const icon = type === 'success' 
-        ? '<i class="fas fa-check-circle"></i>' 
-        : '<i class="fas fa-exclamation-circle"></i>';
-    
-    elements.statusMessage.innerHTML = `${icon}<h3>${message}</h3>`;
-    elements.statusMessage.className = `status-message ${type}`;
-    
-    // Auto-hide after 5 seconds
-    setTimeout(() => {
-        elements.statusMessage.className = 'status-message';
-    }, 5000);
-}
-
-function scrollToFirstError() {
-    const firstError = document.querySelector('.validation-message.show');
-    if (firstError) {
-        firstError.scrollIntoView({ 
-            behavior: 'smooth', 
-            block: 'center' 
+            // Reset button handler
+            resetBtn.addEventListener('click', function() {
+                // Reset form
+                form.reset();
+                
+                // Clear error message
+                certNumberError.textContent = '';
+                
+                // Hide results and show empty state
+                resultsContainer.style.display = 'none';
+                emptyState.style.display = 'block';
+                
+                // Focus on input field
+                certificateNumberInput.focus();
+            });
+            
+            // Demo certificate numbers for testing
+            const demoCertificates = [
+                'CERT-2023-001',
+                'CERT-2023-002', 
+                'CERT-2023-003',
+                'TRAIN-2023-A01',
+                'TRAIN-2023-B02'
+            ];
+            
+            // Add clickable demo certificate numbers
+            const demoContainer = document.createElement('div');
+            demoContainer.style.marginTop = '20px';
+            demoContainer.style.padding = '15px';
+            demoContainer.style.backgroundColor = '#f0f9ff';
+            demoContainer.style.borderRadius = '8px';
+            demoContainer.style.border = '1px solid #d1ecff';
+            
+            demoContainer.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                    <i class="fas fa-lightbulb" style="color: #ff7e00;"></i>
+                    <h4 style="color: #333; margin: 0;">Try these demo certificate numbers:</h4>
+                </div>
+                <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+                    ${demoCertificates.map(cert => `
+                        <button type="button" class="demo-cert-btn" 
+                                style="background: white; border: 1px solid #ff7e00; color: #ff7e00; 
+                                       padding: 8px 15px; border-radius: 5px; cursor: pointer;
+                                       font-size: 0.9rem; transition: all 0.3s;"
+                                data-cert="${cert}">
+                            ${cert}
+                        </button>
+                    `).join('')}
+                </div>
+            `;
+            
+            // Insert demo container after the form
+            const formGroup = document.querySelector('.form-group');
+            formGroup.parentNode.insertBefore(demoContainer, formGroup.nextSibling);
+            
+            // Add click handlers for demo certificate buttons
+            document.addEventListener('click', function(event) {
+                if (event.target.classList.contains('demo-cert-btn')) {
+                    const certNumber = event.target.getAttribute('data-cert');
+                    certificateNumberInput.value = certNumber;
+                    
+                    // Trigger form submission
+                    submitBtn.click();
+                }
+            });
         });
-    }
-}
-
-function resetForm() {
-    elements.form.reset();
-    resetFileInput();
-    
-    // Reset dates to defaults
-    const today = new Date().toISOString().split('T')[0];
-    elements.startDate.value = today;
-    
-    const nextWeek = new Date();
-    nextWeek.setDate(nextWeek.getDate() + 7);
-    elements.endDate.value = nextWeek.toISOString().split('T')[0];
-    
-    // Clear validations
-    [elements.nameValidation, elements.certificateValidation, 
-     elements.startDateValidation, elements.endDateValidation].forEach(el => {
-        hideValidation(el);
-    });
-}
-
-// Demo data for testing (remove in production)
-function addDemoData() {
-    elements.participantName.value = 'Alex Johnson';
-    elements.certificateNumber.value = 'CERT-2023-58742';
-    validateName();
-    validateCertificateNumber();
-}
-
-// Initialize when DOM is loaded
-document.addEventListener('DOMContentLoaded', initForm);
-  </script>
+    </script>
 </body>
 </html>

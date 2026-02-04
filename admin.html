@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Certificate Generator</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="logo">
+                <i class="fas fa-certificate"></i>
+                <h1>Certificate Generator</h1>
+            </div>
+            <p>Fill out the form below to generate your training certificate</p>
+        </header>
+
+        <main class="main-content">
+            <div class="form-container">
+                <div class="form-header">
+                    <h2><i class="fas fa-file-alt"></i> Certificate Details</h2>
+                    <p>Please provide all the required information</p>
+                </div>
+                
+                <form id="certificateForm">
+                    <div class="form-group">
+                        <label for="participantName">
+                            <i class="fas fa-user"></i> Full Name of Participant
+                            <span class="required">*</span>
+                        </label>
+                        <input type="text" id="participantName" name="participantName" placeholder="Enter full name">
+                        <div class="error-message" id="nameError"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="certificateNumber">
+                            <i class="fas fa-hashtag"></i> Certificate Number
+                            <span class="required">*</span>
+                        </label>
+                        <input type="text" id="certificateNumber" name="certificateNumber" placeholder="e.g., CERT-2023-001">
+                        <div class="error-message" id="certNumberError"></div>
+                    </div>
+
+                    <div class="date-group">
+                        <div class="form-group">
+                            <label for="trainingStartDate">
+                                <i class="fas fa-calendar-alt"></i> Training Start Date
+                                <span class="required">*</span>
+                            </label>
+                            <input type="date" id="trainingStartDate" name="trainingStartDate">
+                            <div class="error-message" id="startDateError"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="trainingEndDate">
+                                <i class="fas fa-calendar-check"></i> Training End Date
+                                <span class="required">*</span>
+                            </label>
+                            <input type="date" id="trainingEndDate" name="trainingEndDate">
+                            <div class="error-message" id="endDateError"></div>
+                        </div>
+                    </div>
+
+                    <div class="form-group checkbox-group">
+                        <input type="checkbox" id="termsAgreement" name="termsAgreement">
+                        <label for="termsAgreement">I confirm that the information provided is accurate and complete</label>
+                        <div class="error-message" id="termsError"></div>
+                    </div>
+
+                    <div class="button-group">
+                        <button type="submit" class="btn submit-btn" id="submitBtn">
+                            <i class="fas fa-paper-plane"></i> Submit Certificate
+                        </button>
+                        <button type="reset" class="btn reset-btn">
+                            <i class="fas fa-redo"></i> Clear Form
+                        </button>
+                    </div>
+                </form>
+
+                <div class="form-footer">
+                    <p><i class="fas fa-info-circle"></i> Your certificate will be processed and saved to our records.</p>
+                </div>
+            </div>
+
+            <div class="preview-container">
+                <div class="preview-header">
+                    <h2><i class="fas fa-eye"></i> Certificate Preview</h2>
+                </div>
+                <div class="certificate-preview">
+                    <div class="certificate-border">
+                        <div class="certificate-content">
+                            <div class="certificate-header">
+                                <h3>CERTIFICATE OF COMPLETION</h3>
+                                <div class="certificate-logo">
+                                    <i class="fas fa-award"></i>
+                                </div>
+                            </div>
+                            <div class="certificate-body">
+                                <p class="certificate-text">This certifies that</p>
+                                <h2 class="participant-name" id="previewName">[Participant Name]</h2>
+                                <p class="certificate-text">has successfully completed the training program</p>
+                                <div class="date-info">
+                                    <p>From: <span id="previewStartDate">[Start Date]</span></p>
+                                    <p>To: <span id="previewEndDate">[End Date]</span></p>
+                                </div>
+                                <div class="certificate-number">
+                                    Certificate ID: <span id="previewCertNumber">[Certificate Number]</span>
+                                </div>
+                            </div>
+                            <div class="certificate-footer">
+                                <div class="signature">
+                                    <div class="signature-line"></div>
+                                    <p>Training Coordinator</p>
+                                </div>
+                                <div class="date-issued">
+                                    <p>Date Issued: <span id="previewIssueDate">Today's Date</span></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="preview-footer">
+                    <p><i class="fas fa-lightbulb"></i> This is a preview. Actual certificate will be generated after submission.</p>
+                </div>
+            </div>
+        </main>
+
+        <div class="notification" id="notification">
+            <div class="notification-content">
+                <i class="fas fa-check-circle"></i>
+                <p>Form submitted successfully!</p>
+            </div>
+        </div>
+
+        <div class="loading-overlay" id="loadingOverlay">
+            <div class="spinner"></div>
+            <p>Submitting your certificate...</p>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
